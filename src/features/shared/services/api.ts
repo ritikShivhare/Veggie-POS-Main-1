@@ -175,7 +175,8 @@ export class ApiClient {
     try {
       const response = await fetch(`/api/sync?tenantId=${encodeURIComponent(tenantId)}`, {
         headers: this.getHeaders(tenantId, sessionId),
-        credentials: "include"
+        credentials: "include",
+        signal: AbortSignal.timeout(6000)
       });
       if (!response.ok) {
         if (response.status === 401) {
@@ -225,6 +226,7 @@ export class ApiClient {
         method: "POST",
         headers: this.getHeaders(tenantId, sessionId, idempKey),
         credentials: "include",
+        signal: AbortSignal.timeout(6000),
         body: JSON.stringify(payload)
       });
       if (!response.ok) {

@@ -68,6 +68,7 @@ function AppContent() {
     purchases,
     shifts,
     isInitialSyncLoading,
+    setIsInitialSyncLoading,
     settings,
     setSettings,
     toastMessage,
@@ -143,6 +144,16 @@ function AppContent() {
   }, [toastMessage, setToastMessage]);
 
   const [unreadNotifsCount, setUnreadNotifsCount] = useState<number>(0);
+
+  // Safety timeout: Never allow sync overlay to block the POS interface for more than 2.5 seconds
+  useEffect(() => {
+    if (isInitialSyncLoading) {
+      const timer = setTimeout(() => {
+        setIsInitialSyncLoading(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialSyncLoading, setIsInitialSyncLoading]);
 
   // Poll notifications for real-time badge count
   useEffect(() => {
@@ -490,6 +501,13 @@ function AppContent() {
                   <p className="text-sm font-bold text-slate-800 tracking-tight">Synchronizing POS Terminal...</p>
                   <p className="text-xs text-slate-500 font-medium">Fetching real-time menu, orders & shifts</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setIsInitialSyncLoading(false)}
+                  className="mt-2 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-1.5 rounded-lg border border-emerald-200/80 transition cursor-pointer"
+                >
+                  Continue to Terminal
+                </button>
               </div>
             </div>
           )}

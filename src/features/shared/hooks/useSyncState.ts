@@ -93,6 +93,16 @@ export function useSyncState({ activeTenantId, currentStaff, currentSessionId }:
   const [isInitialSyncLoading, setIsInitialSyncLoading] = useState<boolean>(!initialCache);
   const [toastMessage, setToastMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Watchdog Safety Timer: Guarantees POS terminal loading overlay NEVER stays stuck beyond 3.5 seconds
+  useEffect(() => {
+    if (isInitialSyncLoading) {
+      const timer = setTimeout(() => {
+        setIsInitialSyncLoading(false);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialSyncLoading]);
+
   // Gemini AI Report State
   const [aiReport, setAiReport] = useState<string>("");
   const [isGeneratingReport, setIsGeneratingReport] = useState<boolean>(false);
@@ -115,8 +125,15 @@ export function useSyncState({ activeTenantId, currentStaff, currentSessionId }:
         const localData = await offlineRepository.getFullTenantState(activeTenantId);
         if (cancelled) return;
 
-        if (localData.menuItems && localData.menuItems.length > 0) {
-          setMenuItems(localData.menuItems);
+        const hasAnyCachedData =
+          (localData.menuItems && localData.menuItems.length > 0) ||
+          (localData.ingredients && localData.ingredients.length > 0) ||
+          (localData.staffList && localData.staffList.length > 0) ||
+          (localData.orders && localData.orders.length > 0) ||
+          (localData.settings && Object.keys(localData.settings).length > 0);
+
+        if (hasAnyCachedData) {
+          if (localData.menuItems && localData.menuItems.length > 0) setMenuItems(localData.menuItems);
           if (localData.ingredients && localData.ingredients.length > 0) setIngredients(localData.ingredients);
           if (localData.recipes && localData.recipes.length > 0) setRecipes(localData.recipes);
           if (localData.staffList && localData.staffList.length > 0) setStaffList(localData.staffList as any);
@@ -134,7 +151,8 @@ export function useSyncState({ activeTenantId, currentStaff, currentSessionId }:
       }
 
       if (cancelled) return;
-      setIsInitialSyncLoading(true);
+      // When no local cache exists, initialize defaults and release loading state immediately
+      setIsInitialSyncLoading(false);
       const isMain = activeTenantId === "veg-main-001";
       setMenuItems(INITIAL_MENU_ITEMS);
       setIngredients(INITIAL_INGREDIENTS);
@@ -424,6 +442,7 @@ export function useSyncState({ activeTenantId, currentStaff, currentSessionId }:
         }
       } catch (err) {
         console.warn("Failed to perform initial database synchronization for tenant:", activeTenantId, err);
+      } finally {
         setIsInitialSyncLoading(false);
       }
     };
@@ -915,6 +934,7 @@ export function useSyncState({ activeTenantId, currentStaff, currentSessionId }:
     shifts,
     setShifts,
     isInitialSyncLoading,
+    setIsInitialSyncLoading,
     settings,
     setSettings,
     toastMessage,
