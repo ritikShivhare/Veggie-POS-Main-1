@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "DM Serif Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-bone: #FBF9F5;
+  --color-oat: #F4F0E8;
+  --color-oat-dark: #EAE5DA;
+  --color-charcoal: #181A18;
+  --color-charcoal-light: #242823;
+  --color-leaf: #6E8F45;
+  --color-leaf-dark: #567234;
+  --color-saffron: #D97706;
+}
+
+/* Base typography defaults */
+body {
+  font-family: var(--font-sans);
+  background-color: #FBF9F5;
+  color: #1C1E1B;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(110, 143, 69, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(110, 143, 69, 0.45);
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thermal POS Printing Standard Styles (80mm / 58mm ESC/POS) */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+
+  .printable-thermal-receipt,
+  .printable-thermal-receipt * {
+    visibility: visible;
+  }
+
+  .printable-thermal-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 76mm;
+    margin: 0 auto;
+    padding: 6mm 4mm;
+    font-family: 'JetBrains Mono', monospace, Courier, monospace;
+    font-size: 11px;
+    line-height: 1.35;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
